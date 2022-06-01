@@ -1,11 +1,15 @@
 package bullscows;
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Scanner;
 
 public class Game {
     private int bulls = 0;
     private int cows = 0;
-    int[] secretCode;
+    int secretCode;
+    private int turn = 0;
+    private boolean isRunning = true;
+    private int length;
 
     public Game() {
         startGame();
@@ -15,13 +19,23 @@ public class Game {
         Scanner scanner = new Scanner(System.in);
         //checkGuess(scanner.nextInt(), secretCode);
         //showResult();
-        System.out.println(generateSecretCode(scanner.nextInt()));
+        System.out.println("Please, enter the secret code's length:");
+        length = scanner.nextInt();
+        if (length > 9) {
+            System.out.println("Error");
+        } else {
+            secretCode =  Integer.parseInt(generateSecretCode(length));
+            System.out.println("Okay, let's start a game!");
+            while (isRunning) {
+                System.out.printf("Turn %d:",++turn);
+                checkGuess(scanner.nextInt(), secretCode);
+                showResult();
+            }
+        }
+            System.exit(0);
     }
 
     private String generateSecretCode(int length) {
-        if (length > 9) {
-            return "Error";
-        }
         long randomSeed = Math.abs(System.nanoTime());
         StringBuilder builder = new StringBuilder();
         while (builder.length() < length) {
@@ -40,34 +54,43 @@ public class Game {
 
     private void showResult() {
         if (bulls > 0 && cows > 0) {
-            System.out.printf("Grade: %d bull(s) and %d cow(s). The secret code is 9305.", bulls, cows);
+            System.out.printf("Grade: %d bull(s) and %d cow(s).", bulls, cows);
         } else if (bulls > 0) {
-            System.out.printf("Grade: %d bull(s). The secret code is 9305.", bulls);
+            System.out.printf("Grade: %d bull(s)", bulls);
+            if (bulls == length) {
+                System.out.println("\nCongratulations! You guessed the secret code.");
+                isRunning = false;
+            }
         } else if (cows > 0) {
             System.out.printf("Grade: %d cow(s). The secret code is 9305.", cows);
         } else {
-            System.out.println("Grade: None. The secret code is 9305.");
+            System.out.println("Grade: None");
+        }
+        bulls = 0;
+        cows = 0;
+    }
+
+    private void checkGuess(int number, int code) {
+        ArrayList<Integer> userGuess = getIntegerArrayList(number);
+        ArrayList<Integer> secretCode = getIntegerArrayList(code);
+
+        for (int i = 0; i < secretCode.size(); i++) {
+            for (int j = 0; j < userGuess.size(); j++) {
+                if (i == j && secretCode.get(i).equals(userGuess.get(j))) {
+                    bulls++;
+                } else if (i != j && secretCode.get(i).equals(userGuess.get(j))) {
+                    cows++;
+                }
+            }
         }
     }
 
-    private void checkGuess(int number, int[] code) {
-
-        //int length = number != 0 ? (int) (Math.log10(number) + 1) : 1; // check length
-        int[] secretCode = code;
-        int[] userGuess = new int[4];
-        for (int i = userGuess.length - 1; i >= 0 ; i--) {
-            userGuess[i] = number % 10;
+    private ArrayList<Integer> getIntegerArrayList(int number) {
+        ArrayList<Integer> array = new ArrayList<>();
+        while (number != 0) {
+            array.add(0,number % 10);
             number /= 10;
         }
-        for (int i = 0; i < secretCode.length; i++) {
-            for (int j = 0; j < userGuess.length; j++) {
-                if (i == j && secretCode[i] == userGuess[j]) {
-                    bulls++;
-                } else if (i != j &&  secretCode[i] == userGuess[j]) {
-                    cows++;
-                }
-
-            }
-        }
+        return array;
     }
 }
