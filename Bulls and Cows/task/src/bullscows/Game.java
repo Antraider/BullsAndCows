@@ -1,6 +1,6 @@
 package bullscows;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Random;
 import java.util.Scanner;
 
 public class Game {
@@ -17,8 +17,6 @@ public class Game {
 
     private void startGame() {
         Scanner scanner = new Scanner(System.in);
-        //checkGuess(scanner.nextInt(), secretCode);
-        //showResult();
         System.out.println("Please, enter the secret code's length:");
         length = scanner.nextInt();
         if (length > 9) {
@@ -36,18 +34,16 @@ public class Game {
     }
 
     private String generateSecretCode(int length) {
-        long randomSeed = Math.abs(System.nanoTime());
         StringBuilder builder = new StringBuilder();
         while (builder.length() < length) {
-            if (randomSeed == 0) {
-                randomSeed = Math.abs(System.nanoTime());
+            Random random = new Random();
+            int temp = random.nextInt(10);
+            if (builder.indexOf(Integer.toString(temp)) == -1) {
+                builder.append(temp);
             }
-            if (builder.indexOf(Long.toString(randomSeed % 10)) != -1 || randomSeed % 10 == 0) {
-                randomSeed /= 10;
-                continue;
+            if (builder.charAt(0) == '0') {
+                builder.deleteCharAt(0);
             }
-            builder.append(randomSeed % 10);
-            randomSeed /= 10;
         }
         return builder.toString();
     }
