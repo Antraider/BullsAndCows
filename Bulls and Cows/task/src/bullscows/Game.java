@@ -1,15 +1,14 @@
 package bullscows;
-import java.util.ArrayList;
-import java.util.Random;
-import java.util.Scanner;
+import java.util.*;
 
 public class Game {
     private int bulls = 0;
     private int cows = 0;
-    int secretCode;
+    String secretCode;
     private int turn = 0;
     private boolean isRunning = true;
     private int length;
+    private int range;
 
     public Game() {
         startGame();
@@ -19,32 +18,50 @@ public class Game {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Please, enter the secret code's length:");
         length = scanner.nextInt();
+        System.out.println("Input the number of possible symbols in the code:");
+        range = scanner.nextInt();
+
         if (length > 9) {
             System.out.println("Error");
         } else {
-            secretCode =  Integer.parseInt(generateSecretCode(length));
+            secretCode =  generateSecretCode(length, range);
             System.out.println("Okay, let's start a game!");
             while (isRunning) {
                 System.out.printf("Turn %d:",++turn);
-                checkGuess(scanner.nextInt(), secretCode);
+                checkGuess(scanner.next(), secretCode);
                 showResult();
             }
         }
             System.exit(0);
     }
 
-    private String generateSecretCode(int length) {
-        StringBuilder builder = new StringBuilder();
-        while (builder.length() < length) {
-            Random random = new Random();
-            int temp = random.nextInt(10);
-            if (builder.indexOf(Integer.toString(temp)) == -1) {
-                builder.append(temp);
-            }
-            if (builder.charAt(0) == '0') {
-                builder.deleteCharAt(0);
-            }
+    private String generateSecretCode(int length, int range) {
+        String s = "0123456789abcdefghijklmnopqrstuvwxyz";
+        String codeSeed = s.substring(0, range);
+        String temp;
+        char[] seed = codeSeed.toCharArray();
+
+        ArrayList<Character> cod = new ArrayList<>();
+        for (char ch: seed) {
+            cod.add(ch);
         }
+        Collections.shuffle(cod);
+        StringBuilder builder = new StringBuilder();
+
+        for (int i = 0; i < length; i++) {
+            builder.append(cod.get(i));
+        }
+        StringBuilder codePrepared = new StringBuilder();
+        codePrepared.append("The secret is prepared: ");
+        codePrepared.append("*".repeat(Math.max(0, length)));
+        if (range < 11) {
+            temp = codeSeed.replaceAll("^(\\d).*(\\d)", " ($1-$2)");
+        } else {
+            temp = codeSeed.replaceAll("^(\\d).*(\\d)(\\w).*(\\w)", " ($1-$2, $3-$4)");
+        }
+        codePrepared.append(temp);
+        System.out.println(codePrepared.toString());
+
         return builder.toString();
     }
 
@@ -66,27 +83,19 @@ public class Game {
         cows = 0;
     }
 
-    private void checkGuess(int number, int code) {
-        ArrayList<Integer> userGuess = getIntegerArrayList(number);
-        ArrayList<Integer> secretCode = getIntegerArrayList(code);
+    private void checkGuess(String number, String code) {
+        char[] guess = number.toCharArray();
+        char[] secret = code.toCharArray();
 
-        for (int i = 0; i < secretCode.size(); i++) {
-            for (int j = 0; j < userGuess.size(); j++) {
-                if (i == j && secretCode.get(i).equals(userGuess.get(j))) {
+        for (int i = 0; i < secret.length; i++) {
+            for (int j = 0; j < guess.length; j++) {
+                if (i == j && secret[i] == guess[j]) {
                     bulls++;
-                } else if (i != j && secretCode.get(i).equals(userGuess.get(j))) {
+                } else if (i != j && secret[i] == guess[j]) {
                     cows++;
                 }
             }
         }
     }
 
-    private ArrayList<Integer> getIntegerArrayList(int number) {
-        ArrayList<Integer> array = new ArrayList<>();
-        while (number != 0) {
-            array.add(0,number % 10);
-            number /= 10;
-        }
-        return array;
-    }
 }
