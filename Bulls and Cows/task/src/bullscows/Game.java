@@ -4,7 +4,7 @@ import java.util.*;
 public class Game {
     private int bulls = 0;
     private int cows = 0;
-    String secretCode;
+    private String secretCode;
     private int turn = 0;
     private boolean isRunning = true;
     private int length;
@@ -17,14 +17,33 @@ public class Game {
     private void startGame() {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Please, enter the secret code's length:");
-        length = scanner.nextInt();
+        String len = scanner.nextLine();
+        try {
+            length = Integer.parseInt(len);
+        } catch (NumberFormatException e) {
+            System.out.println("Error: \"" + len + "\" isn't a valid number.");
+            System.exit(0);
+        }
+        if (length == 0) {
+            System.out.println("Error: \"" + length + "\" isn't a valid number.");
+            System.exit(0);
+        }
         System.out.println("Input the number of possible symbols in the code:");
         range = scanner.nextInt();
+
+        if (range < length) {
+            System.out.printf("Error: it's not possible to generate a code with a length of %d with %d unique symbols.",length , range);
+            System.exit(0);
+        }
+        if (range > 36) {
+            System.out.println("Error: maximum number of possible symbols in the code is 36 (0-9, a-z).");
+            System.exit(0);
+        }
 
         if (length > 9) {
             System.out.println("Error");
         } else {
-            secretCode =  generateSecretCode(length, range);
+            secretCode = generateSecretCode(length, range);
             System.out.println("Okay, let's start a game!");
             while (isRunning) {
                 System.out.printf("Turn %d:",++turn);
